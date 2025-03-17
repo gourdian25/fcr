@@ -305,4 +305,4 @@ else
         echo "Keeping binary file: $binary_path"
         echo "All done!"
     fi
-fi  
+fi
