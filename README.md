@@ -1,81 +1,165 @@
-# Fast C++ Compiler and Runner (fcr)
+# fcr - Documentation
 
-`fcr` is a Bash script designed to simplify the process of compiling and running C++ programs. It provides a fast and user-friendly interface with support for interactive file selection, debug mode, and more.
+## Introduction
+
+**fcr** (Fast C++ Compiler and Runner) is a powerful and user-friendly command-line tool designed to simplify the process of compiling and running C++ programs. With sensible defaults and an intuitive interface powered by [Gum CLI](https://github.com/charmbracelet/gum), fcr makes C++ development faster and more enjoyable.
+
+Whether you're working on a small project or experimenting with C++ code, fcr provides a seamless experience with features like interactive file selection, debug mode, and customizable C++ standards.
 
 ---
 
 ## Features
 
-- **Interactive File Selection**: Use the `-g` flag to enable interactive file selection with Gum.
-- **C++ Standard Support**: Choose between `c++17` and `c++20` standards using the `-s` flag.
-- **Debug Mode**: Enable debug mode with the `-d` flag to include debugging symbols in the compiled binary.
-- **Verbose Mode**: Use the `-v` flag to enable verbose output, showing all commands being executed.
-- **Cleanup Control**: Use the `-n` flag to keep the compiled binary after execution.
-- **Gum Integration**: If Gum is installed, the script provides a beautiful and interactive UI.
+- **Fast Compilation and Execution**:
+  - Compile and run C++ programs with a single command.
+  - Supports C++17 and C++20 standards.
+
+- **Interactive File Selection**:
+  - Use the `-g` flag to enable interactive file selection with Gum.
+  - Automatically detects and lists `.cpp` files in the current directory and subdirectories.
+
+- **Debug Mode**:
+  - Enable debug mode with the `-d` flag to include debugging symbols (`-g` flag) in the compiled binary.
+
+- **Verbose Mode**:
+  - Use the `-v` flag to enable verbose output, showing all commands being executed.
+
+- **Cleanup Control**:
+  - Use the `-n` flag to keep the compiled binary after execution.
+
+- **Gum Integration**:
+  - If Gum is installed, fcr provides a beautiful and interactive UI for file selection and output.
+
+---
+
+## Dependencies
+
+Before using fcr, ensure the following dependencies are installed:
+
+1. **G++ (GNU C++ Compiler)**:
+   - Required for compiling C++ programs.
+   - Install on Ubuntu/Debian:
+     ```bash
+     sudo apt install g++
+     ```
+   - Install on macOS:
+     ```bash
+     brew install gcc
+     ```
+
+2. **Gum CLI (Optional)**:
+   - Required for the interactive interface.
+   - Install using the following command:
+     ```bash
+     brew install gum
+     ```
+   - Alternatively, visit the [Gum CLI GitHub page](https://github.com/charmbracelet/gum) for installation instructions.
 
 ---
 
 ## Installation
 
-1. **Clone the Repository**:
+You can install fcr directly using a single command. However, the installation method depends on your shell:
+
+### For Bash or Zsh
+Run the following command in your terminal:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/gourdian25/fcr/master/install.sh | sh
+```
+
+### For Fish Shell
+Fish shell requires explicit use of `bash` to interpret the script. Run:
+
+```fish
+curl -fsSL https://raw.githubusercontent.com/gourdian25/fcr/master/install.sh | bash
+```
+
+### Manual Installation
+If the above methods don't work, you can manually download and install fcr:
+
+1. Download the script:
    ```bash
-   git clone https://github.com/your-repo/fcr.git
-   cd fcr
+   curl -fsSL https://raw.githubusercontent.com/gourdian25/fcr/master/install.sh -o install.sh
    ```
 
-2. **Make the Script Executable**:
+2. Make it executable:
    ```bash
-   chmod +x fcr.sh
+   chmod +x install.sh
    ```
 
-3. **Install Gum (Optional)**:
-   If you want to use the interactive file selection feature, install Gum:
+3. Run the script:
    ```bash
-   brew install gum
+   ./install.sh
    ```
+
+This script will:
+1. Download the latest version of fcr.
+2. Make it executable.
+3. Place it in a directory included in your `$PATH` (e.g., `/usr/local/bin`).
 
 ---
 
 ## Usage
 
-### Basic Usage
+### Running fcr
+
+To start using fcr, simply run the following command:
+
 ```bash
-./fcr.sh main.cpp
+fcr
+```
+
+### Step-by-Step Guide
+
+1. **Interactive File Selection**:
+   - If you run `fcr` without arguments, it will prompt you to select a `.cpp` file interactively (if Gum is installed).
+   - Use the `-g` flag to enable Gum-based file selection.
+
+2. **Compile and Run**:
+   - fcr will compile the selected `.cpp` file using the default C++20 standard.
+   - The compiled binary will be executed immediately.
+
+3. **Debug Mode**:
+   - Use the `-d` flag to compile the program with debugging symbols (`-g` flag).
+
+4. **Verbose Mode**:
+   - Use the `-v` flag to enable verbose output, showing all commands being executed.
+
+5. **Keep Binary**:
+   - Use the `-n` flag to keep the compiled binary after execution.
+
+---
+
+## Examples
+
+### Compile and Run a C++ File
+
+```bash
+fcr main.cpp
+```
+
+### Use C++17 Standard
+
+```bash
+fcr -s c++17 main.cpp
+```
+
+### Debug Mode and Keep Binary
+
+```bash
+fcr -d -n main.cpp
 ```
 
 ### Interactive File Selection
-```bash
-./fcr.sh -g
-```
 
-### Set C++ Standard
 ```bash
-./fcr.sh -s c++17 main.cpp
-```
-
-### Enable Debug Mode
-```bash
-./fcr.sh -d main.cpp
-```
-
-### Keep Binary After Execution
-```bash
-./fcr.sh -n main.cpp
-```
-
-### Enable Verbose Mode
-```bash
-./fcr.sh -v main.cpp
-```
-
-### Show Help
-```bash
-./fcr.sh -h
+fcr -g
 ```
 
 ---
 
-## Options
+## Command-Line Options
 
 | Flag          | Description                                                                 |
 |---------------|-----------------------------------------------------------------------------|
@@ -88,67 +172,51 @@
 
 ---
 
-## Examples
+## File Structure
 
-1. **Compile and Run a C++ File**:
-   ```bash
-   ./fcr.sh main.cpp
-   ```
+### Compiled Binary
 
-2. **Use C++17 Standard**:
-   ```bash
-   ./fcr.sh -s c++17 main.cpp
-   ```
+By default, fcr creates a binary with the same name as the `.cpp` file. For example:
+- If the input file is `main.cpp`, the binary will be `main`.
 
-3. **Debug Mode and Keep Binary**:
-   ```bash
-   ./fcr.sh -d -n main.cpp
-   ```
-
-4. **Interactive File Selection**:
-   ```bash
-   ./fcr.sh -g
-   ```
+If a directory with the same name as the binary exists, fcr will append `_bin` to the binary name (e.g., `main_bin`).
 
 ---
 
-## Notes
+## References
 
-- If the `-g` flag is not passed, the file path must be provided as an argument.
-- If Gum is not installed, the script will fall back to a simpler UI.
-- The script cleans up the compiled binary by default unless the `-n` flag is used.
-
----
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+- **Gum CLI**: [https://github.com/charmbracelet/gum](https://github.com/charmbracelet/gum)
+- **G++ Documentation**: [https://gcc.gnu.org/](https://gcc.gnu.org/)
+- **C++ Standards**: [https://isocpp.org/](https://isocpp.org/)
 
 ---
 
 ## Contributing
 
-Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
+Contributions to fcr are welcome! If you'd like to contribute, please follow these steps:
+
+1. Fork the repository: [https://github.com/gourdian25/fcr](https://github.com/gourdian25/fcr).
+2. Create a new branch for your feature or bugfix.
+3. Submit a pull request with a detailed description of your changes.
+
+---
+
+## License
+
+fcr is open-source and licensed under the **MIT License**. See the [LICENSE](https://github.com/gourdian25/fcr/blob/master/LICENSE) file for more details.
+
+---
+
+## Support
+
+If you encounter any issues or have questions, please open an issue on the [GitHub repository](https://github.com/gourdian25/fcr/issues).
 
 ---
 
 ## Author
 
-[Your Name](https://github.com/your-username)
-```
+fcr is is developed and maintained by [gourdian25](https://github.com/gourdian25) and [lordofthemind](https://github.com/lordofthemind).
 
 ---
 
-### Key Points in `README.md`
-
-1. **Features**: Highlights the key functionalities of the script.
-2. **Installation**: Provides steps to install and set up the script.
-3. **Usage**: Demonstrates how to use the script with examples.
-4. **Options**: Lists all available command-line options.
-5. **Examples**: Provides practical examples for common use cases.
-6. **Notes**: Includes important notes about the script's behavior.
-7. **License**: Specifies the license under which the script is distributed.
-8. **Contributing**: Encourages contributions from the community.
-9. **Author**: Credits the author of the script.
-
-This `README.md` provides a comprehensive guide for users to understand and use the script effectively.
+Thank you for using fcr! 🚀
