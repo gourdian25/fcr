@@ -1,0 +1,308 @@
+#!/bin/bash
+
+# ======================================================================
+# fcr - Fast C++ Compiler and Runner
+# 
+# This script compiles and runs C++ files with sensible defaults.
+# It supports interactive file selection, debug mode, and more.
+# ======================================================================
+
+# -------------------- Global Variables --------------------
+use_gum=false         # Flag to enable/disable Gum (default: false)
+cpp_standard="c++20"  # Default C++ standard version
+debug_mode=false      # Flag to enable debug mode
+verbose_mode=false    # Flag to enable verbose mode
+no_clean=false        # Flag to disable cleanup after execution
+cpp_file=""           # Path to the C++ file to compile
+
+# -------------------- Helper Functions --------------------
+
+# Display help information
+show_help() {
+    echo "Fast C++ Compiler and Runner (fcr)"
+    echo
+    echo "USAGE:"
+    echo "  $(basename "$0") [options] [cpp_file]"
+    echo
+    echo "OPTIONS:"
+    echo "  -h, --help       Show this help message and exit"
+    echo "  -s <standard>    Set C++ standard (c++17 or c++20, default: c++20)"
+    echo "  -d               Enable debug mode (adds -g flag to compilation)"
+    echo "  -v               Enable verbose mode (shows commands being executed)"
+    echo "  -n               Do not clean up binary after execution"
+    echo "  -g               Enable Gum for interactive file selection"
+    echo
+    echo "EXAMPLES:"
+    echo "  $(basename "$0") main.cpp            # Compile and run main.cpp"
+    echo "  $(basename "$0") -s c++17 main.cpp   # Use C++17 standard"
+    echo "  $(basename "$0") -d -n main.cpp      # Debug mode, keep binary"
+    echo "  $(basename "$0") -g                  # Use Gum to select a file interactively"
+    echo
+    echo "NOTE: If -g is not passed, the file path must be provided as an argument."
+    exit 0
+}
+
+# Extract the GCC version from compiler output
+get_gcc_version() {
+    g++ --version | head -n 1 | awk '{print $4}'
+}
+
+# Print a formatted line (top and bottom borders)
+print_line() {
+    if [ "$use_gum" = true ] && command -v gum &> /dev/null; then
+        terminal_width=$(tput cols)
+        line_width=$((terminal_width * 99 / 100))
+        gum style --foreground $1 "$(gum join --horizontal $(printf "▁%.0s" $(seq 1 $line_width)))"
+        gum style --foreground $2 "$(gum join --horizontal $(printf "▔%.0s" $(seq 1 $line_width)))"
+    else
+        terminal_width=$(tput cols)
+        line_width=$((terminal_width * 99 / 100))
+        echo "$(printf "▔%.0s" $(seq 1 $line_width))"
+    fi
+}
+
+# Display a styled message with borders
+print_message() {
+    local color=$1
+    local message=$2
+    
+    if [ "$use_gum" = true ] && command -v gum &> /dev/null; then
+        print_line 33 46
+        gum style --foreground $color "$message"
+        print_line 33 46
+    else
+        echo "$message"
+    fi
+}
+
+# Display error message and exit
+show_error() {
+    if [ "$use_gum" = true ] && command -v gum &> /dev/null; then
+        print_message 196 "❌ Error: $1"
+    else
+        echo "Error: $1"
+    fi
+    exit 1
+}
+
+# Display compiler information
+show_compiler_info() {
+    if [ "$use_gum" = true ] && command -v gum &> /dev/null; then
+        print_line 33 46
+        gum style --foreground 39 "🔧    Compiler GCC:"
+        gum style --foreground 45 "🛠️     GCC Version: $(get_gcc_version)"
+        gum style --foreground 51 "📋    C++ Standard Version: $cpp_standard"
+        gum style --foreground 87 "🚩    Compiler Flags: -std=$cpp_standard -Wall -Wextra"
+        print_line 33 46
+    else
+        echo "Compiler: GCC"
+        echo "GCC Version: $(get_gcc_version)"
+        echo "C++ Standard Version: $cpp_standard"
+        echo "Compiler Flags: -std=$cpp_standard -Wall -Wextra"
+    fi
+}
+
+# Display usage information
+show_usage() {
+    if [ "$use_gum" = true ] && command -v gum &> /dev/null; then
+        print_message 202 "❌ Usage: $(basename "$0") <cpp_file> [-s c++17|c++20] [-d] [-v] [-n] [-g] [-h]"
+        print_message 202 "Run '$(basename "$0") -h' for more information."
+    else
+        echo "Usage: $(basename "$0") <cpp_file> [-s c++17|c++20] [-d] [-v] [-n] [-g] [-h]"
+        echo "Run '$(basename "$0") -h' for more information."
+    fi
+    exit 1
+}
+
+# Interactive file selection using Gum
+select_cpp_file() {
+    # Find all .cpp files recursively in the current directory and subdirectories
+    files=$(find . -name "*.cpp" -type f | sort | sed 's|^\./||')
+    
+    # Check if any C++ files were found
+    if [ -z "$files" ]; then
+        show_error "No C++ files found in the current directory or subdirectories."
+    fi
+
+    # Use gum filter to let the user select a file
+    selected_file=$(echo "$files" | gum filter --placeholder "📂 Type to filter and select a C++ file to compile..." --indicator "➤" --indicator.foreground 212)
+    
+    # Check if a file was selected
+    if [ -z "$selected_file" ]; then
+        show_error "No file selected. Exiting."
+    fi
+    
+    echo "$selected_file"
+}
+
+# -------------------- Main Script --------------------
+
+# Parse command-line options
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        # Show help
+        -h|--help)
+            show_help
+            ;;
+        # Set C++ standard (only supports c++17 or c++20)
+        -s)
+            if [[ "$2" == "c++17" || "$2" == "c++20" ]]; then
+                cpp_standard="$2"
+                shift 2  # Move past the argument
+            else
+                show_error "Invalid C++ standard. Use 'c++17' or 'c++20'."
+            fi
+            ;;
+        # Enable debug mode
+        -d) debug_mode=true; shift ;;
+        # Enable verbose mode (for debugging script execution)
+        -v) verbose_mode=true; shift ;;
+        # Disable cleaning after execution
+        -n) no_clean=true; shift ;;
+        # Enable Gum (interactive file selection)
+        -g) use_gum=true; shift ;;
+        # Handle the input file argument
+        *)
+            if [[ -z "$cpp_file" ]]; then
+                cpp_file="$1"
+                shift
+            else
+                show_error "Unrecognized option '$1'."
+            fi
+            ;;
+    esac
+done
+
+# If -g is not passed, the file path must be provided as an argument
+if [ "$use_gum" = false ] && [ -z "$cpp_file" ]; then
+    show_error "File path must be provided as an argument when -g is not used."
+fi
+
+# If -g is passed, allow interactive file selection
+if [ "$use_gum" = true ] && [ -z "$cpp_file" ]; then
+    if ! command -v gum &> /dev/null; then
+        show_error "Gum is not installed. Please install Gum or provide the file path as an argument."
+    fi
+    cpp_file=$(select_cpp_file)
+fi
+
+# Check if the source file exists
+if [ ! -f "$cpp_file" ]; then
+    show_error "File '$cpp_file' not found!"
+fi
+
+# Get absolute path of the source file
+cpp_file_abs=$(realpath "$cpp_file")
+
+# Extract the filename without extension for the output binary
+filename=$(basename "$cpp_file" .cpp)
+
+# Get the directory of the source file
+source_dir=$(dirname "$cpp_file_abs")
+
+# Store the current directory
+current_dir=$(pwd)
+
+# Check if the output binary name would conflict with an existing directory
+if [ -d "$current_dir/$filename" ]; then
+    binary_path="$current_dir/${filename}_bin"
+    if [ "$use_gum" = true ] && command -v gum &> /dev/null; then
+        print_message 208 "⚠️ Directory '$filename' exists. Using '${filename}_bin' as output name."
+    else
+        echo "Warning: Directory '$filename' exists. Using '${filename}_bin' as output name."
+    fi
+else
+    binary_path="$current_dir/$filename"
+fi
+
+# Enable verbose mode if requested
+if [ "$verbose_mode" = true ]; then
+    print_message 208 "🔍 Verbose mode enabled - tracing commands..."
+    set -x  # Enable command tracing for debugging
+fi
+
+# Display compiler information
+show_compiler_info
+
+# Prepare compile command - compiled binary goes to current directory
+compile_cmd="g++ -std=$cpp_standard -Wall -Wextra"
+if [ "$debug_mode" = true ]; then
+    print_message 208 "🐞 Debug mode enabled!"
+    compile_cmd+=" -g"
+else
+    if [ "$use_gum" = true ] && command -v gum &> /dev/null; then
+        print_message 51 "🔨 Compiling with standard optimizations..."
+    fi
+fi
+
+# Add output filepath to compile command
+compile_cmd+=" -o \"$binary_path\" \"$cpp_file_abs\""
+
+# Compile the program
+eval $compile_cmd
+
+# Check if compilation was successful
+if [ $? -eq 0 ]; then
+    if [ "$use_gum" = true ] && command -v gum &> /dev/null; then
+        print_message 46 "✅ Compilation successful!"
+        gum style --foreground 27 "🚀 Running $filename..."
+        print_line 33 46
+        
+        # Program output section
+        print_line 33 46
+        gum style --foreground 39 "📤 Program Output:"
+        print_line 33 46
+    else
+        terminal_width=$(tput cols)
+        line_width=$((terminal_width * 99 / 100))
+        echo "Compilation successful. Running $filename..."
+        echo "$(printf "▔%.0s" $(seq 1 $line_width))"
+        echo "Program Output:"
+        echo "$(printf "▔%.0s" $(seq 1 $line_width))"
+    fi
+    
+    # Change directory to the location of the compiled binary before running
+    cd "$current_dir"
+    
+    # Run the program with explicit path
+    "$binary_path"
+    run_status=$?
+    
+    if [ "$use_gum" = true ] && command -v gum &> /dev/null; then
+        print_line 33 46
+    else
+        terminal_width=$(tput cols)
+        line_width=$((terminal_width * 99 / 100))
+        echo "$(printf "▔%.0s" $(seq 1 $line_width))"
+    fi
+    
+    # If the program didn't exit successfully, show the error code
+    if [ $run_status -ne 0 ]; then
+        print_message 196 "⚠️ Program exited with code $run_status"
+    fi
+else
+    show_error "Compilation failed!"
+fi
+
+# Clean up the compiled file unless -n is passed
+if [ "$no_clean" = false ]; then
+    if [ "$use_gum" = true ] && command -v gum &> /dev/null; then
+        print_message 105 "🧹 Cleaning up..."
+    else
+        echo "Cleaning up..."
+    fi
+    rm "$binary_path"
+    if [ "$use_gum" = true ] && command -v gum &> /dev/null; then
+        print_message 46 "✨ All done!"
+    else
+        echo "Cleaned up. All done!"
+    fi
+else
+    if [ "$use_gum" = true ] && command -v gum &> /dev/null; then
+        print_message 214 "📝 Keeping binary file: $binary_path"
+        print_message 46 "✨ All done!"
+    else
+        echo "Keeping binary file: $binary_path"
+        echo "All done!"
+    fi
+fi
