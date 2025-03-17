@@ -227,11 +227,11 @@ show_compiler_info
 # Prepare compile command - compiled binary goes to current directory
 compile_cmd="g++ -std=$cpp_standard -Wall -Wextra"
 if [ "$debug_mode" = true ]; then
-    print_message 208 "🐞 Debug mode enabled!"
+    print_message 208 "🐞   Debug mode enabled!"
     compile_cmd+=" -g"
 else
     if [ "$use_gum" = true ] && command -v gum &> /dev/null; then
-        print_message 51 "🔨 Compiling with standard optimizations..."
+        print_message 51 "🔨    Compiling with standard optimizations..."
     fi
 fi
 
@@ -287,20 +287,20 @@ fi
 # Clean up the compiled file unless -n is passed
 if [ "$no_clean" = false ]; then
     if [ "$use_gum" = true ] && command -v gum &> /dev/null; then
-        print_message 105 "🧹 Cleaning up..."
+        print_message 105 "🧹   Cleaning up..."
     else
         echo "Cleaning up..."
     fi
     rm "$binary_path"
     if [ "$use_gum" = true ] && command -v gum &> /dev/null; then
-        print_message 46 "✨ All done!"
+        print_message 46 "✨    All done!"
     else
         echo "Cleaned up. All done!"
     fi
 else
     if [ "$use_gum" = true ] && command -v gum &> /dev/null; then
         print_message 214 "📝   Keeping binary file: $binary_path"
-        print_message 46 "✨ All done!"
+        print_message 46 "✨    All done!"
     else
         echo "Keeping binary file: $binary_path"
         echo "All done!"
