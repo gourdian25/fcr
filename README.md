@@ -39,10 +39,13 @@ Before using fcr, ensure the following dependencies are installed:
 1. **G++ (GNU C++ Compiler)**:
    - Required for compiling C++ programs.
    - Install on Ubuntu/Debian:
+
      ```bash
      sudo apt install g++
      ```
+
    - Install on macOS:
+
      ```bash
      brew install gcc
      ```
@@ -50,9 +53,11 @@ Before using fcr, ensure the following dependencies are installed:
 2. **Gum CLI (Optional)**:
    - Required for the interactive interface.
    - Install using the following command:
+
      ```bash
      brew install gum
      ```
+
    - Alternatively, visit the [Gum CLI GitHub page](https://github.com/charmbracelet/gum) for installation instructions.
 
 ---
@@ -62,6 +67,7 @@ Before using fcr, ensure the following dependencies are installed:
 You can install fcr directly using a single command. However, the installation method depends on your shell:
 
 ### For Bash or Zsh
+
 Run the following command in your terminal:
 
 ```bash
@@ -69,6 +75,7 @@ curl -fsSL https://raw.githubusercontent.com/gourdian25/fcr/master/install.sh | 
 ```
 
 ### For Fish Shell
+
 Fish shell requires explicit use of `bash` to interpret the script. Run:
 
 ```fish
@@ -76,24 +83,29 @@ curl -fsSL https://raw.githubusercontent.com/gourdian25/fcr/master/install.sh | 
 ```
 
 ### Manual Installation
+
 If the above methods don't work, you can manually download and install fcr:
 
 1. Download the script:
+
    ```bash
    curl -fsSL https://raw.githubusercontent.com/gourdian25/fcr/master/install.sh -o install.sh
    ```
 
 2. Make it executable:
+
    ```bash
    chmod +x install.sh
    ```
 
 3. Run the script:
+
    ```bash
    ./install.sh
    ```
 
 This script will:
+
 1. Download the latest version of fcr.
 2. Make it executable.
 3. Place it in a directory included in your `$PATH` (e.g., `/usr/local/bin`).
@@ -177,6 +189,7 @@ fcr -g
 ### Compiled Binary
 
 By default, fcr creates a binary with the same name as the `.cpp` file. For example:
+
 - If the input file is `main.cpp`, the binary will be `main`.
 
 If a directory with the same name as the binary exists, fcr will append `_bin` to the binary name (e.g., `main_bin`).
